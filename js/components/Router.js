@@ -2,13 +2,181 @@ const {neverland: $, render, html, useState} = window.neverland;
 
 import Navigator from './Navigator.js';
 
-const Router = $(function(corpus) {
-	
-	const [appStatus, setAppStatus] = useState({
-		isLoggedIn: false,
-		corpus: null,
-		upload: []
-	});
+const Router = $(function(appStatus, setAppStatus) {
+
+	function toCorpus() {
+		return () => {
+
+			fetch(`data/demo/SWARM-corporate-espionage.json`)
+				.then(response => response.json())
+				.then(corpus => {
+					setAppStatus(prevAppStatus => {
+						let status = {...prevAppStatus};
+						status.corpus = corpus;
+						return status;
+					})
+				})
+		}
+	}
+
+	function toCorpusFromScratch() {
+		return () => {
+			let nodes = [],
+				edges = [],
+				docs = {};
+
+			let files = [
+				'Corporate Espionage - aoraki00311.json',
+				'Corporate Espionage - joondalup00311.json',
+				'Corporate Espionage - kakadu00219.json',
+				'Corporate Espionage - kosciuszko00219.json',
+				'Corporate Espionage - labclass3a.json',
+				'Corporate Espionage - labclass3b.json',
+				'Corporate Espionage - labclass7a.json',
+				'Corporate Espionage - labclass7b.json',
+				'Corporate Espionage - murramang00311.json'
+			];
+
+			let fileLabels = [
+				'aoraki00311',
+				'joondalup00311',
+				'kakadu00219',
+				'kosciuszko00219',
+				'labclass3a',
+				'labclass3b',
+				'labclass7a',
+				'labclass7b',
+				'murramang00311'
+			];
+
+			let promises = [];
+
+			files.forEach((filename, index) => {
+				promises.push(
+					fetch(`data/demo/${filename}`)
+						.then(response => response.json())
+						.then(doc => {
+
+							// Slightly refactor JSON to match expected format.
+							doc.nodes = doc.nodes.map(d => {
+								return {
+									"nodeID": `${index}-${d.id}`,
+									"fileID": index,
+									"file": fileLabels[index],
+									"text": d.text,
+									"type": d.type,
+									"scheme": d.scheme,
+									"katz": 1
+								}
+							})
+							doc.edges = doc.edges.map(d => {
+								return {
+									"toID": `${index}-${d.to.id}`,
+									"fromID": `${index}-${d.from.id}`
+								}
+							})
+
+							nodes = nodes.concat(doc.nodes);
+							edges = edges.concat(doc.edges);
+							docs[fileLabels[index]] = doc.analysis.txt;
+						})
+				)
+			})
+
+			Promise.all(promises).then(() => {
+				
+				// Simplify edge format.
+				let newEdges = [],
+					newNodes = [];
+
+				function getEdge(node, type) {
+
+					let fromID = edges.filter(e => e.toID == node.nodeID)[0].fromID,
+						toID   = edges.filter(e => e.fromID == node.nodeID)[0].toID;
+
+					return {
+						"from": fromID,
+						"to": toID,
+						"type": type
+					};
+				}
+
+				nodes.forEach(function(nd) {
+					if (nd.scheme == "72") { // Default Inference
+						newEdges.push(getEdge(nd, 'supports'));
+					} else if (nd.scheme == '71') { // Default Conflict
+						newEdges.push(getEdge(nd, 'attacks'));
+					} else if (nd.scheme == '144') { // Default Rephrase
+						newEdges.push(getEdge(nd, 'similar'));
+					} else {
+						newNodes.push(nd);
+					}
+				})
+
+				// Compute Katz centrality.
+				
+				// 1 - Construct adjacency matrix.
+				let nNodes = nodes.length,
+					rowTemplate = new Array(nNodes).fill(0),
+					alpha = 0.5,
+					I = [],
+					A = [],
+					ones = [];
+				for (let k = 0; k < nNodes; k++) {
+					A.push([...rowTemplate]);
+					let identityRow = [...rowTemplate];
+					identityRow[k] = 1;
+					I.push(identityRow);
+					ones.push([1]);
+				}
+				let nodeIDs = newNodes.map(nd => nd.nodeID);
+				for (let e of newEdges) {
+					let i = nodeIDs.indexOf(e.from),
+						j = nodeIDs.indexOf(e.to);
+					A[i][j] += 1;
+				}
+
+				let katz;
+
+				katz = math.transpose(math.multiply(math.subtract(math.inv(math.subtract(I, math.multiply(alpha, math.transpose(A)))), I), ones))[0];
+
+				newNodes.forEach(function(n, i) {
+					n.katz = katz[i];
+				})
+
+				// Export.
+
+				function downloadObjectAsJson(exportObj, exportName){
+					var dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(exportObj));
+					var downloadAnchorNode = document.createElement('a');
+					downloadAnchorNode.setAttribute("href",     dataStr);
+					downloadAnchorNode.setAttribute("download", exportName + ".json");
+					document.body.appendChild(downloadAnchorNode); // required for firefox
+					downloadAnchorNode.click();
+					downloadAnchorNode.remove();
+				}
+
+				let corpus = {
+					"nodes": newNodes,
+					"edges": {
+						"support": newEdges.filter(e => e.type == "supports"),
+						"attack": newEdges.filter(e => e.type == "attacks"),
+						"equivalence": newEdges.filter(e => e.type == "similar")
+					},
+					"docs": docs
+				};
+
+				// downloadObjectAsJson(corpus, 'SWARM-corporate-espionage');
+
+				
+				setAppStatus(prevAppStatus => {
+					let status = {...prevAppStatus};
+					status.corpus = corpus;
+					return status;
+				})
+			})		
+		}
+	}
 	
 	function dropHandler(ev) {
 		// Prevent default behavior (Prevent file from being opened)
@@ -133,20 +301,15 @@ const Router = $(function(corpus) {
 				<div class="two-columns">
 					
 					<div class="column">
-						<h2>Explore sample corpora</h2>
+						<h2>Explore a sample corpus</h2>
 
-						<p>Select one of the following pre-annotated corpora to quickly explore the interface. Because annotations already exist for these corpora, selecting them will only demonstrate the GUI component of the tool (not the deep learning component).</p>
+						<p>Select the following pre-annotated corpus to quickly explore the interface. Because annotations already exist for this corpus, selecting it will only demonstrate the GUI component of the tool (not the deep learning component).</p>
 
 						<div class="flow">
 
-						<div class="sample">
+						<div class="sample" onclick="${toCorpus()}">
 							<strong>SWARM Reports</strong>
 							Intelligence-style reports written by teams of student, public and organisational analysts as part of the 2020 Hunt Challenge and follow up exercises. Manually annotated in order to best demonstrate the potential of the UI.
-						</div>
-
-						<div class="sample">
-							<strong>Persuasive Essays</strong>
-							Short persuasive essays on the topic of ___, automatically annotated. These essays were part of the test set of the corpus on which the neural networks were trained, so were not seen during training, but are similar in style to documents that were.
 						</div>
 
 						</div>
@@ -186,7 +349,7 @@ const Router = $(function(corpus) {
 
 						<p>Navigator is an experimental, prototype application designed to enhance an analyst's ability to quickly understand the contents of a large corpus of documents.</p>
 
-						<p>It uses deep learning to extract a  graph of the argumentative structure of the corpus, where nodes correspond to propositions, and edges correspond to relations between propositions such as <em>support</em>, <em>conflict</em> or <em>semantically similar</em>.</p>
+						<p>It uses deep learning to extract a  graph of the argumentative structure of the corpus, where nodes correspond to propositions, and edges correspond to relations between propositions such as <em>support</em>, <em>attack</em> or <em>semantically similar</em>.</p>
 
 						<p>It then provides an accessible graphical user interface for navigating the multi-document argument map.</p>
 
@@ -200,7 +363,7 @@ const Router = $(function(corpus) {
 		`;
 	} else {
 		return html`
-			${Navigator(appStatus.corpus)}
+			${Navigator(appStatus.corpus, setAppStatus)}
 		`;
 	}
 });
