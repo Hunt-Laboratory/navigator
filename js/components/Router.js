@@ -10,6 +10,54 @@ const Router = $(function(appStatus, setAppStatus) {
 			fetch(`data/demo/SWARM-corporate-espionage.json`)
 				.then(response => response.json())
 				.then(corpus => {
+
+					// // Compute Katz centrality.
+				
+					// // 1 - Construct adjacency matrix.
+					// let newNodes = corpus.nodes,
+					// 	newEdges = corpus.edges.support.concat(corpus.edges.attack);
+					// let nNodes = newNodes.length,
+					// 	rowTemplate = new Array(nNodes).fill(0),
+					// 	alpha = 0.5,
+					// 	I = [],
+					// 	A = [],
+					// 	ones = [];
+					// for (let k = 0; k < nNodes; k++) {
+					// 	A.push([...rowTemplate]);
+					// 	let identityRow = [...rowTemplate];
+					// 	identityRow[k] = 1;
+					// 	I.push(identityRow);
+					// 	ones.push([1]);
+					// }
+					// let nodeIDs = newNodes.map(nd => nd.nodeID);
+					// for (let e of newEdges) {
+					// 	let i = nodeIDs.indexOf(e.from),
+					// 		j = nodeIDs.indexOf(e.to);
+					// 	A[i][j] += 1;
+					// }
+
+					// let katz;
+
+					// katz = math.transpose(math.multiply(math.subtract(math.inv(math.subtract(I, math.multiply(alpha, math.transpose(A)))), I), ones))[0];
+
+					// corpus.nodes.forEach(function(n, i) {
+					// 	n.katz = katz[i];
+					// })
+
+					// // Export.
+
+					// function downloadObjectAsJson(exportObj, exportName){
+					// 	var dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(exportObj));
+					// 	var downloadAnchorNode = document.createElement('a');
+					// 	downloadAnchorNode.setAttribute("href",     dataStr);
+					// 	downloadAnchorNode.setAttribute("download", exportName + ".json");
+					// 	document.body.appendChild(downloadAnchorNode); // required for firefox
+					// 	downloadAnchorNode.click();
+					// 	downloadAnchorNode.remove();
+					// }
+
+					// downloadObjectAsJson(corpus, 'katz-export')
+
 					setAppStatus(prevAppStatus => {
 						let status = {...prevAppStatus};
 						status.corpus = corpus;
@@ -309,12 +357,12 @@ const Router = $(function(appStatus, setAppStatus) {
 
 						<div class="sample" onclick="${toCorpus()}">
 							<strong>SWARM Reports</strong>
-							Intelligence-style reports written by teams of student, public and organisational analysts as part of the 2020 Hunt Challenge and follow up exercises. Manually annotated in order to best demonstrate the potential of the UI.
+							Intelligence-style reports written by teams of student, public and organisational analysts in response to the 'Corporate Espionage' problem posed during the 2020 Hunt Challenge and follow up exercises. Manually annotated in order to best demonstrate the potential of the UI.
 						</div>
 
 						</div>
 
-						<h2>Upload your own corpus</h2>
+						<h2>Upload your own corpus <em>(coming soon!)</em></h2>
 
 						<p>To use your own corpus, upload one or more text files below. Navigator will attempt to extract the argumentative structure of the text, then take you to the GUI to explore the extracted argument graph.</p>
 
@@ -336,7 +384,7 @@ const Router = $(function(appStatus, setAppStatus) {
 						</div>
 
 						<button id="api-button" class="api-button hide">
-							<i class="fas fa-chart-network"></i>&nbsp;&nbsp;Extract argument map
+							<i class="fas fa-chart-network"></i>&nbsp;&nbsp;Extract argument map <em>(coming soon!)</em>
 						</button>
 
 					</div>

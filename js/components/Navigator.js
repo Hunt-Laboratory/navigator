@@ -11,7 +11,7 @@ const Navigator = $(function(corpus, setAppStatus) {
   		closeable: false,
   		pinned: 'left',
       new: false,
-      nResults: 3,
+      nResults: 5,
       sortBy: 'Katz centrality'
   	}]
   );
