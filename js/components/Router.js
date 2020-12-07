@@ -7,7 +7,7 @@ const Router = $(function(appStatus, setAppStatus) {
 	function toCorpus() {
 		return () => {
 
-			fetch(`data/demo/SWARM-corporate-espionage.json`)
+			fetch(`data/sample-annotated/SWARM-corporate-espionage.json`)
 			// fetch(`data/demo/api-test.json`)
 				.then(response => response.json())
 				.then(corpus => {
