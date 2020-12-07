@@ -241,11 +241,10 @@ const Router = $(function(appStatus, setAppStatus) {
 				
 				// If dropped items aren't files, reject them
 				if (ev.dataTransfer.items[i].kind === 'file') {
-					var file = ev.dataTransfer.items[i].getAsFile();
+					let file = ev.dataTransfer.items[i].getAsFile();
 					// console.log('... file[' + i + '].name = ' + file.name);
 					reader.onload = function(e) {
 						var contents = e.target.result;
-						
 						setAppStatus(prevAppStatus => {
 							let status = {...prevAppStatus};
 							let max_idx = Math.max(-1, ...status.payload.docs.map(d => d.idx));
@@ -377,6 +376,13 @@ const Router = $(function(appStatus, setAppStatus) {
 				console.log('RESPONSE')
 				console.log(data);
 
+				if (data.hasOwnProperty('message')) {
+					document.getElementById("api-loading").classList.add('hide');
+					document.getElementById("api-timeout").classList.remove('hide');
+					document.getElementById("api-retry-button").classList.remove('hide');
+					return;
+				}
+
 				if (data !== null) {
 					setAppStatus(prevAppStatus => {
 						let status = {...prevAppStatus};
@@ -394,7 +400,9 @@ const Router = $(function(appStatus, setAppStatus) {
 
 		setAppStatus(prevAppStatus => {
 			let status = {...prevAppStatus};
-			status.upload = [];
+			status.payload = {
+				'docs': []
+			};
 			return status;
 		})
 		document.getElementById('browse').value = null;
@@ -405,6 +413,7 @@ const Router = $(function(appStatus, setAppStatus) {
 	
 	function retry(ev) {
 		document.getElementById("api-error").classList.add('hide');
+		document.getElementById("api-timeout").classList.add('hide');
 		document.getElementById("api-retry-button").classList.add('hide');
 		document.getElementById("dragdrop").classList.remove('hide');
 		removeFile();
@@ -457,15 +466,19 @@ const Router = $(function(appStatus, setAppStatus) {
 						</button>
 
 						<div id="api-loading" class="filedrop loading hide">
-							<i class="fas fa-cog fa-spin"></i>&nbsp;&nbsp;The documents are being analysed. May take a minute or two.
+							<i class="fas fa-cog fa-spin"></i>&nbsp;&nbsp;The documents are being analysed. May take up to 30 seconds.
 						</div>
 
 						<div id="api-error" class="filedrop error hide">
 							<i class="fas fa-bug"></i>&nbsp;&nbsp;There was an error with the model API, sorry!<br />Your texts must be an edge case we didn't anticipate.
 						</div>
 
+						<div id="api-timeout" class="filedrop error hide">
+							<i class="fas fa-stopwatch"></i>&nbsp;&nbsp;The API timed out, sorry!<br />Try analysing fewer documents.
+						</div>
+
 						<button id="api-retry-button" class="api-button hide" onclick="${retry}">
-							<i class="fas fa-long-arrow-left"></i>&nbsp;&nbsp;Try other documents</em>
+							<i class="fas fa-long-arrow-left"></i>&nbsp;&nbsp;Try again</em>
 						</button>
 
 					</div>

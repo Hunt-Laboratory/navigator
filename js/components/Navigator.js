@@ -30,6 +30,9 @@ const Navigator = $(function(corpus, setAppStatus) {
     setAppStatus(prevStatus => {
       let status = {...prevStatus};
       status.corpus = null;
+      status.payload = {
+        'docs': []
+      };
       return status;
     })
   }

@@ -366,6 +366,7 @@ nav button:focus {
 	/*background-color: var(--colour-bg-alt);*/
 	border-top: 3px solid var(--colour-bg-alt);
 	/*scroll-behavior: smooth;*/
+	padding-top: 20px;
 }
 
 .panel-source .highlighted {
