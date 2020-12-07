@@ -247,9 +247,11 @@ const Router = $(function(appStatus, setAppStatus) {
 						
 						setAppStatus(prevAppStatus => {
 							let status = {...prevAppStatus};
-							status.upload.push({
-								id: file.name,
-								text: contents
+							let max_idx = Math.max(-1, ...status.payload.docs.map(d => d.idx));
+							status.payload.docs.push({
+								text: contents,
+								src: file.name.replace('.txt',''),
+								idx: max_idx + 1
 							});
 							return status;
 						})
@@ -310,9 +312,11 @@ const Router = $(function(appStatus, setAppStatus) {
 				
 				setAppStatus(prevAppStatus => {
 					let status = {...prevAppStatus};
-					status.upload.push({
-						id: file.name,
-						text: contents
+					let max_idx = Math.max(-1, ...status.payload.docs.map(d => d.idx));
+					status.payload.docs.push({
+						text: contents,
+						src: file.name.replace('.txt',''),
+						idx: max_idx + 1
 					});
 					return status;
 				})
@@ -327,6 +331,38 @@ const Router = $(function(appStatus, setAppStatus) {
 		}
 
 		document.getElementById("api-button").classList.remove('hide');
+	}
+
+	async function postData(url = '', data = {}) {
+		const response = await fetch(url, {
+			method: 'POST',
+			mode: 'cors',
+			cache: 'no-cache',
+			headers: {
+			  'Content-Type': 'application/json'
+			},
+			redirect: 'follow',
+			referrerPolicy: 'no-referrer',
+			body: JSON.stringify(data)
+		});
+		return response.json();
+	}
+
+
+	function analyseTexts(ev) {
+		document.getElementById("api-button").classList.add('hide');
+		document.getElementById("dragdrop").classList.add('hide');
+		document.getElementById("api-loading").classList.remove('hide');
+
+		console.log(appStatus.payload);
+
+		postData('https://pqocr5jzgd.execute-api.ap-southeast-2.amazonaws.com/argument-navigator',
+				appStatus.payload)
+			.then(data => {
+				
+				console.log(data);
+
+			});
 	}
 
 	function removeFile() {
@@ -357,12 +393,12 @@ const Router = $(function(appStatus, setAppStatus) {
 
 						<div class="sample" onclick="${toCorpus()}">
 							<strong>SWARM Reports</strong>
-							Intelligence-style reports written by teams of student, public and organisational analysts in response to the 'Corporate Espionage' problem posed during the 2020 Hunt Challenge and follow up exercises. Manually annotated in order to best demonstrate the potential of the UI.
+							Intelligence-style reports written by teams of student, public and organisational analysts in response to the 'Corporate Espionage' problem posed during the 2020 Hunt Challenge and follow-up exercises. Manually annotated in order to best demonstrate the potential of the UI.
 						</div>
 
 						</div>
 
-						<h2>Upload your own corpus <em>(coming soon!)</em></h2>
+						<h2>Upload your own corpus<!-- <em>(coming soon!)</em>--></h2>
 
 						<p>To use your own corpus, upload one or more text files below. Navigator will attempt to extract the argumentative structure of the text, then take you to the GUI to explore the extracted argument graph.</p>
 
@@ -372,7 +408,7 @@ const Router = $(function(appStatus, setAppStatus) {
 							ondragleave="${dragLeaveHandler}"
 							ondrop="${dropHandler}"
 							>
-							<span class="msg-nofile">Drag and drop (or click to select) your text files.</span>
+							<span class="msg-nofile">Drag and drop your text files (or click to select).</span>
 							<span class="msg-file"><span id="msg-file" class="filename"></span><button id="remove" class="remove-button" onclick="${removeFile}">Click to remove files &#215;</button></span>
 							<input
 								id="browse"
@@ -383,9 +419,13 @@ const Router = $(function(appStatus, setAppStatus) {
 								/>
 						</div>
 
-						<button id="api-button" class="api-button hide">
-							<i class="fas fa-chart-network"></i>&nbsp;&nbsp;Extract argument map <em>(coming soon!)</em>
+						<button id="api-button" class="api-button hide" onclick="${analyseTexts}">
+							<i class="fas fa-chart-network"></i>&nbsp;&nbsp;Extract argument map<!-- <em>(coming soon!)--></em>
 						</button>
+
+						<div id="api-loading" class="filedrop loading hide">
+							<i class="fas fa-cog fa-spin"></i>&nbsp;&nbsp;The documents are being analysed. May take a minute or two.
+						</div>
 
 					</div>
 
@@ -403,7 +443,7 @@ const Router = $(function(appStatus, setAppStatus) {
 
 						<hr />
 
-						<p class="small">This tool was built by <a href="https://lukethorburn.com/">Luke Thorburn</a> at the <a href="http://huntlab.science.unimelb.edu.au/">Hunt Lab for Intelligence Research</a> at the University of Melbourne. The work was funded by the Commonwealth of Australia's Office of National Intelligence as part of the Artificial Intelligence for Decision Making Initiative.</p>
+						<p class="small">This tool was built by <a href="https://lukethorburn.com/">Luke Thorburn</a> from the <a href="http://huntlab.science.unimelb.edu.au/">Hunt Lab for Intelligence Research</a> at the University of Melbourne, with support from the <a href="https://arg-tech.org/">Centre for Argument Technology</a> at the University of Dundee. The work was funded by the Commonwealth of Australia's Office of National Intelligence as part of the Artificial Intelligence for Decision Making Initiative.</p>
 					</div>
 
 				</div>

@@ -632,6 +632,15 @@ nav button:focus {
 	display: none;
 }
 
+.filedrop.loading {
+	color: #fff;
+	background-color: #000;
+}
+
+.filedrop.loading:hover {
+	background-color: #000;
+}
+
 .filebrowse {
 	opacity: 0.0;
 	position: absolute;

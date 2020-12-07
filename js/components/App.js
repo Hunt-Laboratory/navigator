@@ -7,7 +7,9 @@ const App = $(function() {
 	const [appStatus, setAppStatus] = useState({
 		isLoggedIn: false,
 		corpus: null,
-		upload: []
+		payload: {
+			'docs': []
+		}
 	});
 	
 	return html`${Router(appStatus, setAppStatus)}`;
