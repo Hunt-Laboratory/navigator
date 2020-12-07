@@ -356,7 +356,7 @@ const Router = $(function(appStatus, setAppStatus) {
 
 		console.log(appStatus.payload);
 
-		postData('https://pqocr5jzgd.execute-api.ap-southeast-2.amazonaws.com/argument-navigator',
+		postData('https://bwnb0y36gc.execute-api.ap-southeast-2.amazonaws.com/dev/argument-navigator',
 				appStatus.payload)
 			.then(data => {
 				
