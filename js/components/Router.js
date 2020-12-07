@@ -8,6 +8,7 @@ const Router = $(function(appStatus, setAppStatus) {
 		return () => {
 
 			fetch(`data/demo/SWARM-corporate-espionage.json`)
+			// fetch(`data/demo/api-test.json`)
 				.then(response => response.json())
 				.then(corpus => {
 
@@ -334,18 +335,30 @@ const Router = $(function(appStatus, setAppStatus) {
 	}
 
 	async function postData(url = '', data = {}) {
-		const response = await fetch(url, {
-			method: 'POST',
-			mode: 'cors',
-			cache: 'no-cache',
-			headers: {
-			  'Content-Type': 'application/json'
-			},
-			redirect: 'follow',
-			referrerPolicy: 'no-referrer',
-			body: JSON.stringify(data)
-		});
-		return response.json();
+
+		try {
+
+			const response = await fetch(url, {
+				method: 'POST',
+				mode: 'cors',
+				cache: 'no-cache',
+				headers: {
+				  'Content-Type': 'application/json'
+				},
+				redirect: 'follow',
+				referrerPolicy: 'no-referrer',
+				body: JSON.stringify(data)
+			});
+			return response.json();
+
+		} catch (e) {
+
+			document.getElementById("api-loading").classList.add('hide');
+			document.getElementById("api-error").classList.remove('hide');
+			document.getElementById("api-retry-button").classList.remove('hide');
+
+			return null;
+		}
 	}
 
 
@@ -354,18 +367,31 @@ const Router = $(function(appStatus, setAppStatus) {
 		document.getElementById("dragdrop").classList.add('hide');
 		document.getElementById("api-loading").classList.remove('hide');
 
+		console.log('PAYLOAD')
 		console.log(appStatus.payload);
 
 		postData('https://bwnb0y36gc.execute-api.ap-southeast-2.amazonaws.com/dev/argument-navigator',
 				appStatus.payload)
 			.then(data => {
 				
+				console.log('RESPONSE')
 				console.log(data);
 
+				if (data !== null) {
+					setAppStatus(prevAppStatus => {
+						let status = {...prevAppStatus};
+						status.corpus = data;
+						return status;
+					})
+				}
+
 			});
+
 	}
 
 	function removeFile() {
+		console.log('REMOVING FILES');
+
 		setAppStatus(prevAppStatus => {
 			let status = {...prevAppStatus};
 			status.upload = [];
@@ -377,6 +403,13 @@ const Router = $(function(appStatus, setAppStatus) {
 		document.getElementById("api-button").classList.add('hide');
 	}
 	
+	function retry(ev) {
+		document.getElementById("api-error").classList.add('hide');
+		document.getElementById("api-retry-button").classList.add('hide');
+		document.getElementById("dragdrop").classList.remove('hide');
+		removeFile();
+	}
+
 	if (appStatus.corpus === null) {
 		return html`
 			<div class="switcher">
@@ -426,6 +459,14 @@ const Router = $(function(appStatus, setAppStatus) {
 						<div id="api-loading" class="filedrop loading hide">
 							<i class="fas fa-cog fa-spin"></i>&nbsp;&nbsp;The documents are being analysed. May take a minute or two.
 						</div>
+
+						<div id="api-error" class="filedrop error hide">
+							<i class="fas fa-bug"></i>&nbsp;&nbsp;There was an error with the model API, sorry!<br />Your texts must be an edge case we didn't anticipate.
+						</div>
+
+						<button id="api-retry-button" class="api-button hide" onclick="${retry}">
+							<i class="fas fa-long-arrow-left"></i>&nbsp;&nbsp;Try other documents</em>
+						</button>
 
 					</div>
 

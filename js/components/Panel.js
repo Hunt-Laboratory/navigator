@@ -133,7 +133,6 @@ const Panel = $((
 	}
 
 	function fetchBlocksBySource(filename) {
-		console.log(filename);
 		return nodes.filter(d => d.file == filename).map(function(d) {
 			return {
 				nodeID: d.nodeID,

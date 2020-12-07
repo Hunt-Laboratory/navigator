@@ -641,6 +641,15 @@ nav button:focus {
 	background-color: #000;
 }
 
+.filedrop.error {
+	color: #000;
+	background-color: #ffc400;
+}
+
+.filedrop.error:hover {
+	background-color: #ffc400;
+}
+
 .filebrowse {
 	opacity: 0.0;
 	position: absolute;
