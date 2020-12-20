@@ -369,7 +369,7 @@ const Router = $(function(appStatus, setAppStatus) {
 		console.log('PAYLOAD')
 		console.log(appStatus.payload);
 
-		postData('https://bwnb0y36gc.execute-api.ap-southeast-2.amazonaws.com/dev/argument-navigator',
+		postData('https://888o6urx7h.execute-api.ap-southeast-2.amazonaws.com/dev/argument-navigator',
 				appStatus.payload)
 			.then(data => {
 				
@@ -444,7 +444,7 @@ const Router = $(function(appStatus, setAppStatus) {
 
 						<p>To use your own corpus, upload one or more text files below. Navigator will attempt to extract the argumentative structure of the text, then take you to the GUI to explore the extracted argument graph.</p>
 
-						<p style="color: #6a1b9a; font-weight: 500; font-size: .9rem;">To save on costs, this functionality has been (temporarily) disabled. If you would like to try it out, please contact Luke Thorburn at <a href="mailto:luke.thorburn@unimelb.edu.au" style="color: #6a1b9a;">luke.thorburn@unimelb.edu.au</a>.</p>
+						<!--<p style="color: #6a1b9a; font-weight: 500; font-size: .9rem;">To save on costs, this functionality has been (temporarily) disabled. If you would like to try it out, please contact Luke Thorburn at <a href="mailto:luke.thorburn@unimelb.edu.au" style="color: #6a1b9a;">luke.thorburn@unimelb.edu.au</a>.</p>-->
 
 						<div id="dragdrop"
 							class="filedrop"
