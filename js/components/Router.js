@@ -429,7 +429,7 @@ const Router = $(function(appStatus, setAppStatus) {
 					<div class="column">
 						<h2>Explore a sample corpus</h2>
 
-						<p>Select the following pre-annotated corpus to quickly explore the interface. Because annotations already exist for this corpus, selecting it will only demonstrate the GUI component of the tool (not the deep learning component).</p>
+						<p>Select the following pre-annotated corpus to quickly explore the interface. Because annotations already exist for this corpus, selecting it will only demonstrate the GUI component of the tool (not the deep learning component). The original documents which form the basis for the sample can be found <a href="https://github.com/Hunt-Laboratory/navigator/tree/main/data/sample-unannotated/SWARM-corporate-espionage">here</a>.</p>
 
 						<div class="flow">
 
